@@ -543,37 +543,56 @@ let startTime = null;
 let showAnswersMode = false;
 let serverResults = null;
 
+function _uuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+function jsonp(url, timeoutMs) {
+  timeoutMs = timeoutMs || 15000;
+  return new Promise(function(resolve, reject) {
+    var cb = 'cb_' + Math.random().toString(36).slice(2);
+    var script = document.createElement('script');
+    var timer = setTimeout(function() { cleanup(new Error('JSONP timeout')); }, timeoutMs);
+    function cleanup(err) {
+      clearTimeout(timer);
+      try { delete window[cb]; } catch(e) { window[cb] = undefined; }
+      if (script.parentNode) script.parentNode.removeChild(script);
+      if (err) reject(err);
+    }
+    window[cb] = function(data) { cleanup(); resolve(data); };
+    script.onerror = function() { cleanup(new Error('JSONP network error')); };
+    var sep = url.indexOf('?') !== -1 ? '&' : '?';
+    script.src = url + sep + 'callback=' + encodeURIComponent(cb);
+    document.head.appendChild(script);
+  });
+}
+
 function getTestIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get('test') || 'Tema1';
 }
 
 async function loadTest() {
-  const testId = getTestIdFromUrl();
-  
+  var testId = getTestIdFromUrl();
   try {
-    const response = await fetch(`${APPS_SCRIPT_URL}?mode=getQuestions&testId=${testId}`);
-    const data = await response.json();
-    
+    var data = await jsonp(APPS_SCRIPT_URL + '?mode=getQuestions&testId=' + encodeURIComponent(testId));
     if (data.error) {
       document.getElementById('loading').textContent = 'Ошибка: ' + data.error;
       return;
     }
-    
     testData = data.config;
-    questions = data.questions;
-    
-    document.getElementById('test-title').textContent = testData.title;
-    document.getElementById('test-description').textContent = testData.description;
-    
+    questions = data.questions || [];
+    document.getElementById('test-title').textContent = testData.title || 'Тест';
+    document.getElementById('test-description').textContent = testData.description || '';
     renderQuestions();
     updateProgress();
-    
     document.getElementById('loading').style.display = 'none';
     document.getElementById('test-container').style.display = 'block';
-    
     startTime = Date.now();
-    
   } catch(error) {
     document.getElementById('loading').textContent = 'Ошибка загрузки теста: ' + error.message;
   }
@@ -827,43 +846,53 @@ function shuffle(array) {
 }
 
 async function submitTest() {
-  const fio = document.getElementById('student-name').value;
-  const group = document.getElementById('student-group').value;
-  
-  if (!fio) {
-    alert('Пожалуйста, выберите ФИО из списка');
-    return;
-  }
-  
-  if (!group) {
-    alert('Пожалуйста, укажите группу');
-    return;
-  }
-  
-  const duration = Math.floor((Date.now() - startTime) / 1000);
-  
-  const payload = {
+  var fio = document.getElementById('student-name').value;
+  var group = document.getElementById('student-group').value;
+  if (!fio) { alert('Пожалуйста, выберите ФИО из списка'); return; }
+  if (!group) { alert('Пожалуйста, укажите группу'); return; }
+
+  var duration = Math.floor((Date.now() - startTime) / 1000);
+  var clientToken = _uuid();
+
+  var payload = {
     mode: 'submit',
     testId: testData.testId,
     fio: fio,
     group: group,
     attempt: 1,
     duration: duration,
+    clientToken: clientToken,
     answers: answers
   };
-  
+
+  var btns = document.querySelectorAll('.submit-btn');
+  btns.forEach(function(b) { b.disabled = true; b.textContent = 'Отправка...'; });
+
   try {
-    const response = await fetch(APPS_SCRIPT_URL, {
+    await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
       body: JSON.stringify(payload)
     });
-    
-    const result = await response.json();
-    serverResults = result;
-    
-    showResults(result);
-    
+
+    // Опрашиваем результат через JSONP каждые 800мс, до 20 сек
+    var started = Date.now();
+    while (Date.now() - started < 20000) {
+      await new Promise(function(r) { setTimeout(r, 800); });
+      try {
+        var res = await jsonp(APPS_SCRIPT_URL + '?mode=getResult&token=' + encodeURIComponent(clientToken), 10000);
+        if (res && res.success) {
+          serverResults = res;
+          showResults(res);
+          return;
+        }
+      } catch(e) { /* ещё не готово */ }
+    }
+    btns.forEach(function(b) { b.disabled = false; b.textContent = 'Завершить тест'; });
+    alert('Ответы отправлены, но результат пока недоступен. Обратитесь к преподавателю.');
   } catch(error) {
+    btns.forEach(function(b) { b.disabled = false; b.textContent = 'Завершить тест'; });
     alert('Ошибка отправки: ' + error.message);
   }
 }
