@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Электронный бизнес - Тестирование</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f4f6fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+.header {
+  background: #1a3a5c;
+  color: #fff;
+  padding: 20px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.header .container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.header p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.secret-btn {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.secret-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.info-block {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.info-block h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #1a3a5c;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.progress-bar {
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.progress-bar-inner {
+  background: #e0e0e0;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background: #1a3a5c;
+  height: 100%;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.question-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+  border-left: 4px solid #1a3a5c;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 15px;
+}
+
+.question-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a3a5c;
+  background: #e8f0f8;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.question-weight {
+  font-size: 13px;
+  color: #666;
+}
+
+.question-text {
+  font-size: 16px;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option {
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.option:hover {
+  border-color: #1a3a5c;
+  background: #f8f9fb;
+}
+
+.option input[type="radio"],
+.option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.option-text {
+  flex: 1;
+  font-size: 15px;
+}
+
+.option.selected {
+  border-color: #1a3a5c;
+  background: #e8f0f8;
+}
+
+.option.correct {
+  border-color: #28a745;
+  background: #d4edda;
+}
+
+.option.incorrect {
+  border-color: #dc3545;
+  background: #f8d7da;
+}
+
+.matching-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.matching-pair {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.matching-left {
+  flex: 1;
+  padding: 10px 15px;
+  background: #e8f0f8;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.matching-right select {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.ordering-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ordering-item {
+  padding: 12px 15px;
+  background: #f8f9fb;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: move;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ordering-item:hover {
+  border-color: #1a3a5c;
+}
+
+.drag-handle {
+  font-size: 18px;
+  color: #999;
+}
+
+.fillin-template {
+  font-size: 15px;
+  line-height: 2;
+}
+
+.fillin-input {
+  display: inline-block;
+  padding: 4px 10px;
+  border: none;
+  border-bottom: 2px solid #1a3a5c;
+  background: transparent;
+  font-size: 15px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.numeric-input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 300px;
+}
+
+.numeric-input-container input {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.numeric-unit {
+  font-weight: 500;
+  color: #666;
+}
+
+.essay-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.char-counter {
+  text-align: right;
+  font-size: 12px;
+  color: #999;
+  margin-top: 5px;
+}
+
+.submit-section {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.submit-btn {
+  background: #1a3a5c;
+  color: #fff;
+  border: none;
+  padding: 15px 50px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 8px rgba(26,58,92,0.2);
+}
+
+.submit-btn:hover {
+  background: #2c5278;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(26,58,92,0.3);
+}
+
+.result-block {
+  background: #fff;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: none;
+}
+
+.result-score {
+  font-size: 48px;
+  font-weight: 700;
+  color: #1a3a5c;
+  margin-bottom: 5px;
+}
+
+.result-correct {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 400;
+  margin-bottom: 12px;
+}
+
+.result-grade {
+  display: inline-block;
+  padding: 10px 30px;
+  border-radius: 6px;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 20px 0;
+}
+
+.grade-10, .grade-9 {
+  background: #d4edda;
+  color: #155724;
+}
+
+.grade-8, .grade-7 {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.grade-6, .grade-5 {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.grade-4, .grade-3, .grade-2, .grade-1 {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.result-status {
+  margin-top: 20px;
+  padding: 15px;
+  background: #e8f0f8;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.retry-btn {
+  margin-top: 25px;
+  background: #fff;
+  color: #1a3a5c;
+  border: 2px solid #1a3a5c;
+  padding: 12px 40px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.retry-btn:hover {
+  background: #1a3a5c;
+  color: #fff;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 20px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .question-card {
+    padding: 20px 15px;
+  }
+  
+  .result-score {
+    font-size: 36px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <h1 id="test-title">Электронный бизнес - Тестирование</h1>
+    <p id="test-description"></p>
+  </div>
+  <button class="secret-btn" onclick="promptPassword()"></button>
+</div>
+
+<div class="container">
+  <div class="loading" id="loading">Загрузка теста...</div>
+  
+  <div id="test-container" style="display:none;">
+    <div class="info-block">
+      <h2>Информация о студенте</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="student-name">ФИО студента</label>
+          <select id="student-name">
+            <option value="">Выберите...</option>
+            <option value="Аширов Артём">Аширов Артём</option>
+            <option value="Банная Анастасия">Банная Анастасия</option>
+            <option value="Бобров Максим">Бобров Максим</option>
+            <option value="Борошевская Юлия">Борошевская Юлия</option>
+            <option value="Габелева Елизавета">Габелева Елизавета</option>
+            <option value="Демьянцев Ярослав">Демьянцев Ярослав</option>
+            <option value="Коляда Андрей">Коляда Андрей</option>
+            <option value="Куценков Денис">Куценков Денис</option>
+            <option value="Панкрат Никита">Панкрат Никита</option>
+            <option value="Прокопцов Владислав">Прокопцов Владислав</option>
+            <option value="Сердюков Артур">Сердюков Артур</option>
+            <option value="Таланцева Александра">Таланцева Александра</option>
+            <option value="Титенков Артём">Титенков Артём</option>
+            <option value="Тишков Владислав">Тишков Владислав</option>
+            <option value="Чуйкова Дарья">Чуйкова Дарья</option>
+            <option value="Шубенок Сергей">Шубенок Сергей</option>
+            <option value="Гость">Гость</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="student-group">Группа</label>
+          <input type="text" id="student-group" value="А-31">
+        </div>
+      </div>
+    </div>
+    
+    <div class="progress-bar">
+      <div class="progress-bar-inner">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-text" id="progress-text">Отвечено: 0 из 0</div>
+    </div>
+    
+    <div class="submit-section">
+      <button class="submit-btn" onclick="submitTest()">Завершить тест</button>
+    </div>
+    
+    <div id="questions-container"></div>
+    
+    <div class="submit-section">
+      <button class="submit-btn" onclick="submitTest()">Завершить тест</button>
+    </div>
+  </div>
+  
+  <div class="result-block" id="result-block">
+    <div class="result-score" id="result-score"></div>
+    <div class="result-correct" id="result-correct"></div>
+    <div class="result-grade" id="result-grade"></div>
+    <div class="result-status" id="result-status"></div>
+    <button class="retry-btn" onclick="location.reload()">Перепройти тест</button>
+  </div>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6qYwYFUTLpx_tGi-ZH2UahGgHC4CqI4f4yQ5K4FBsZfXZLqLu9mHGDFXrkb3Xu_18rA/exec';
+const TEACHER_PASSWORD = '1945';
+
+let testData = null;
+let questions = [];
+let answers = {};
+let startTime = null;
+let showAnswersMode = false;
+let serverResults = null;
+
+function getTestIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('test') || 'Tema1';
+}
+
+async function loadTest() {
+  const testId = getTestIdFromUrl();
+  
+  try {
+    const response = await fetch(`${APPS_SCRIPT_URL}?mode=getQuestions&testId=${testId}`);
+    const data = await response.json();
+    
+    if (data.error) {
+      document.getElementById('loading').textContent = 'Ошибка: ' + data.error;
+      return;
+    }
+    
+    testData = data.config;
+    questions = data.questions;
+    
+    document.getElementById('test-title').textContent = testData.title;
+    document.getElementById('test-description').textContent = testData.description;
+    
+    renderQuestions();
+    updateProgress();
+    
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('test-container').style.display = 'block';
+    
+    startTime = Date.now();
+    
+  } catch(error) {
+    document.getElementById('loading').textContent = 'Ошибка загрузки теста: ' + error.message;
+  }
+}
+
+function renderQuestions() {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  
+  questions.forEach((q, index) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `q-${q.id}`;
+    
+    let questionHtml = `
+      <div class="question-header">
+        <span class="question-number">Вопрос ${index + 1}</span>
+        <span class="question-weight">${q.weight} ${q.weight === 1 ? 'балл' : 'балла'}</span>
+      </div>
+      <div class="question-text">${q.text}</div>
+    `;
+    
+    if (q.type === 'single') {
+      questionHtml += renderSingle(q);
+    } else if (q.type === 'multi') {
+      questionHtml += renderMulti(q);
+    } else if (q.type === 'truefalse') {
+      questionHtml += renderTrueFalse(q);
+    } else if (q.type === 'matching') {
+      questionHtml += renderMatching(q);
+    } else if (q.type === 'ordering') {
+      questionHtml += renderOrdering(q);
+    } else if (q.type === 'fillin') {
+      questionHtml += renderFillIn(q);
+    } else if (q.type === 'numeric') {
+      questionHtml += renderNumeric(q);
+    } else if (q.type === 'essay') {
+      questionHtml += renderEssay(q);
+    }
+    
+    card.innerHTML = questionHtml;
+    container.appendChild(card);
+  });
+}
+
+function renderSingle(q) {
+  let html = '<div class="options">';
+  q.options.forEach((opt, idx) => {
+    html += `
+      <label class="option" onclick="selectSingle('${q.id}', ${idx})">
+        <input type="radio" name="q-${q.id}" value="${idx}" onchange="updateProgress()">
+        <span class="option-text">${opt}</span>
+      </label>
+    `;
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderMulti(q) {
+  let html = '<div class="options">';
+  q.options.forEach((opt, idx) => {
+    html += `
+      <label class="option" onclick="toggleMulti('${q.id}', ${idx})">
+        <input type="checkbox" class="q-${q.id}" value="${idx}" onchange="updateProgress()">
+        <span class="option-text">${opt}</span>
+      </label>
+    `;
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderTrueFalse(q) {
+  return `
+    <div class="options">
+      <label class="option" onclick="selectSingle('${q.id}', 'true')">
+        <input type="radio" name="q-${q.id}" value="true" onchange="updateProgress()">
+        <span class="option-text">Верно</span>
+      </label>
+      <label class="option" onclick="selectSingle('${q.id}', 'false')">
+        <input type="radio" name="q-${q.id}" value="false" onchange="updateProgress()">
+        <span class="option-text">Неверно</span>
+      </label>
+    </div>
+  `;
+}
+
+function renderMatching(q) {
+  const rightOptions = q.shuffleRight ? shuffle([...q.pairs.map(p => p.right)]) : q.pairs.map(p => p.right);
+  
+  let html = '<div class="matching-container">';
+  q.pairs.forEach((pair, idx) => {
+    html += `
+      <div class="matching-pair">
+        <div class="matching-left">${pair.left}</div>
+        <div class="matching-right">
+          <select onchange="saveMatching('${q.id}', '${pair.left}', this.value); updateProgress()">
+            <option value="">Выберите...</option>
+            ${rightOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderOrdering(q) {
+  let html = `<div class="ordering-container" id="ordering-${q.id}">`;
+  q.items.forEach((item, idx) => {
+    html += `
+      <div class="ordering-item" draggable="true" data-index="${idx}">
+        <span class="drag-handle">☰</span>
+        <span>${item}</span>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  setTimeout(() => {
+    setupDragDrop(q.id);
+  }, 0);
+  
+  return html;
+}
+
+function renderFillIn(q) {
+  let template = q.template;
+  for (let i = 0; i < q.blanksCount; i++) {
+    template = template.replace('[BLANK]', `<input type="text" class="fillin-input" data-qid="${q.id}" data-blank="${i}" onchange="saveFillIn('${q.id}'); updateProgress()">`);
+  }
+  return `<div class="fillin-template">${template}</div>`;
+}
+
+function renderNumeric(q) {
+  return `
+    <div class="numeric-input-container">
+      <input type="number" step="any" placeholder="Введите число" onchange="saveNumeric('${q.id}', this.value); updateProgress()">
+      <span class="numeric-unit">${q.unit}</span>
+    </div>
+  `;
+}
+
+function renderEssay(q) {
+  return `
+    <textarea class="essay-textarea" maxlength="${q.maxLength}" placeholder="Введите развёрнутый ответ..." oninput="saveEssay('${q.id}', this.value); updateCharCount('${q.id}', this.value.length, ${q.maxLength}); updateProgress()"></textarea>
+    <div class="char-counter" id="char-count-${q.id}">0 / ${q.maxLength}</div>
+    ${q.rubric ? `<div style="margin-top:10px; font-size:13px; color:#666;">Критерии: ${q.rubric}</div>` : ''}
+  `;
+}
+
+function selectSingle(qid, value) {
+  answers[qid] = value;
+}
+
+function toggleMulti(qid, value) {
+  setTimeout(() => {
+    const checked = Array.from(document.querySelectorAll(`.q-${qid}:checked`)).map(cb => parseInt(cb.value));
+    answers[qid] = checked.length > 0 ? checked : undefined;
+  }, 0);
+}
+
+function saveMatching(qid, left, right) {
+  if (!answers[qid]) answers[qid] = {};
+  answers[qid][left] = right;
+}
+
+function setupDragDrop(qid) {
+  const container = document.getElementById(`ordering-${qid}`);
+  const items = container.querySelectorAll('.ordering-item');
+  
+  let draggedItem = null;
+  
+  items.forEach(item => {
+    item.addEventListener('dragstart', function() {
+      draggedItem = this;
+      setTimeout(() => this.style.opacity = '0.5', 0);
+    });
+    
+    item.addEventListener('dragend', function() {
+      setTimeout(() => this.style.opacity = '1', 0);
+      draggedItem = null;
+      saveOrdering(qid);
+      updateProgress();
+    });
+    
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+    });
+    
+    item.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (draggedItem !== this) {
+        const allItems = [...container.querySelectorAll('.ordering-item')];
+        const draggedIndex = allItems.indexOf(draggedItem);
+        const targetIndex = allItems.indexOf(this);
+        
+        if (draggedIndex < targetIndex) {
+          this.parentNode.insertBefore(draggedItem, this.nextSibling);
+        } else {
+          this.parentNode.insertBefore(draggedItem, this);
+        }
+      }
+    });
+  });
+}
+
+function saveOrdering(qid) {
+  const container = document.getElementById(`ordering-${qid}`);
+  const items = container.querySelectorAll('.ordering-item');
+  const order = Array.from(items).map(item => parseInt(item.dataset.index));
+  answers[qid] = order;
+}
+
+function saveFillIn(qid) {
+  const inputs = document.querySelectorAll(`input[data-qid="${qid}"]`);
+  const blanks = Array.from(inputs).map(inp => inp.value.trim());
+  answers[qid] = blanks.some(b => b !== '') ? blanks : undefined;
+}
+
+function saveNumeric(qid, value) {
+  answers[qid] = value !== '' ? value : undefined;
+}
+
+function saveEssay(qid, value) {
+  answers[qid] = value.trim() !== '' ? value.trim() : undefined;
+}
+
+function updateCharCount(qid, length, max) {
+  document.getElementById(`char-count-${qid}`).textContent = `${length} / ${max}`;
+}
+
+function updateProgress() {
+  const answered = Object.keys(answers).filter(k => answers[k] !== undefined && answers[k] !== '').length;
+  const total = questions.length;
+  const percent = total > 0 ? (answered / total) * 100 : 0;
+  
+  document.getElementById('progress-fill').style.width = percent + '%';
+  document.getElementById('progress-text').textContent = `Отвечено: ${answered} из ${total}`;
+}
+
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+async function submitTest() {
+  const fio = document.getElementById('student-name').value;
+  const group = document.getElementById('student-group').value;
+  
+  if (!fio) {
+    alert('Пожалуйста, выберите ФИО из списка');
+    return;
+  }
+  
+  if (!group) {
+    alert('Пожалуйста, укажите группу');
+    return;
+  }
+  
+  const duration = Math.floor((Date.now() - startTime) / 1000);
+  
+  const payload = {
+    mode: 'submit',
+    testId: testData.testId,
+    fio: fio,
+    group: group,
+    attempt: 1,
+    duration: duration,
+    answers: answers
+  };
+  
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    
+    const result = await response.json();
+    serverResults = result;
+    
+    showResults(result);
+    
+  } catch(error) {
+    alert('Ошибка отправки: ' + error.message);
+  }
+}
+
+function showResults(result) {
+  document.getElementById('test-container').style.display = 'none';
+  
+  const resultBlock = document.getElementById('result-block');
+  resultBlock.style.display = 'block';
+  
+  document.getElementById('result-score').textContent = `${result.scoreWeighted.toFixed(1)} / ${result.maxWeight}`;
+  document.getElementById('result-correct').textContent = `(правильных вопросов: ${result.correctCount} из ${result.totalCount})`;
+  
+  const gradeDiv = document.getElementById('result-grade');
+  gradeDiv.textContent = `Оценка: ${result.score10}`;
+  gradeDiv.className = 'result-grade grade-' + result.score10;
+  
+  let statusText = `✅ Результат отправлен преподавателю`;
+  if (result.unanswered > 0) {
+    statusText += `<br>⚠️ Пропущено вопросов: ${result.unanswered}`;
+  }
+  if (result.needsManualGrade) {
+    statusText += `<br>📝 Некоторые ответы требуют ручной проверки`;
+  }
+  
+  document.getElementById('result-status').innerHTML = statusText;
+}
+
+function promptPassword() {
+  if (showAnswersMode) {
+    showAnswersMode = false;
+    alert('Режим показа ответов отключён');
+    return;
+  }
+  
+  const password = prompt('Введите пароль преподавателя:');
+  if (password === TEACHER_PASSWORD) {
+    if (serverResults) {
+      showAnswersMode = true;
+      highlightAnswers();
+      alert('Режим показа ответов включён');
+    } else {
+      alert('Сначала завершите тест');
+    }
+  } else if (password !== null) {
+    alert('Неверный пароль');
+  }
+}
+
+function highlightAnswers() {
+  if (!serverResults || !serverResults.details) return;
+  
+  serverResults.details.forEach(detail => {
+    const card = document.getElementById(`q-${detail.qId}`);
+    if (!card) return;
+    
+    const options = card.querySelectorAll('.option');
+    options.forEach(opt => {
+      const input = opt.querySelector('input');
+      if (!input) return;
+      
+      if (detail.correct) {
+        if (input.checked) {
+          opt.classList.add('correct');
+        }
+      } else {
+        if (input.checked) {
+          opt.classList.add('incorrect');
+        }
+      }
+    });
+  });
+}
+
+window.addEventListener('load', loadTest);
+</script>
+
+</body>
+</html>
