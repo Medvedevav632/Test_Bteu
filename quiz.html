@@ -294,7 +294,7 @@ body {
 
 <script>
 // BUG FIX #1: Был указан неверный URL скрипта (другой scriptId)
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzxDupBZgSzH2hlJxAAsVuG5XBt-OB4G7Z4aaYuwV9y__BamWvXCVWflesltX-lo7HIpQ/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8pRDPblZGCAOENV2fNsxDQRMZ4z6ZJmVTFZkRhkCs1B0cS7RkWZHbirlrMfSfDn5lFA/exec';
 const TEACHER_PASSWORD = '1945';
 
 let testData    = null;
@@ -588,7 +588,7 @@ async function submitTest() {
   if (!fio)   { alert('Пожалуйста, выберите ФИО из списка'); return; }
   if (!group) { alert('Пожалуйста, укажите группу'); return; }
 
-  const unansweredCount = questions.length - Object.keys(answers).filter(k => {
+  const answeredCount = Object.keys(answers).filter(k => {
     const v = answers[k];
     if (v === undefined || v === null || v === '') return false;
     if (Array.isArray(v)) return v.length > 0;
@@ -596,62 +596,45 @@ async function submitTest() {
     return true;
   }).length;
 
+  const unansweredCount = questions.length - answeredCount;
   if (unansweredCount > 0) {
-    const ok = confirm(`Вы не ответили на ${unansweredCount} вопр. Завершить тест?`);
-    if (!ok) return;
+    if (!confirm(`Вы не ответили на ${unansweredCount} вопр. Завершить тест?`)) return;
   }
 
-  const duration    = Math.floor((Date.now() - startTime) / 1000);
-  const clientToken = 'tk_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+  const duration = Math.floor((Date.now() - startTime) / 1000);
 
   const payload = {
-    mode:        'submit',
-    testId:      testData.testId,
-    fio,
-    group,
-    attempt:     1,
+    testId:   testData.testId,
+    fio, group,
+    attempt:  1,
     duration,
-    clientToken,
     answers
   };
 
   setSubmitBtns(true);
-  showPolling('Отправка результатов…');
+  showSendingMsg('Отправка результатов… ⏳');
 
-  // BUG FIX #3: Прямой POST к GAS блокируется CORS-preflight.
-  // Используем mode:'no-cors' для отправки (fire-and-forget),
-  // затем опрашиваем сервер через GET по clientToken.
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode:   'no-cors',
-      body:   JSON.stringify(payload)
-    });
-  } catch (e) {
-    // no-cors всегда выбрасывает ошибку при попытке читать ответ — это нормально
-  }
+    const url  = APPS_SCRIPT_URL + '?mode=submit&data=' + encodeURIComponent(JSON.stringify(payload));
+    const resp = await fetch(url);
+    const result = await resp.json();
 
-  pollForResult(clientToken);
-}
+    hideSendingMsg();
 
-async function pollForResult(token) {
-  const MAX_TRIES = 40;
-  for (let i = 0; i < MAX_TRIES; i++) {
-    await new Promise(r => setTimeout(r, 1500));
-    showPolling(`Получение результатов… (${i + 1}/${MAX_TRIES})`);
-    try {
-      const resp = await fetch(`${APPS_SCRIPT_URL}?mode=getResult&token=${token}`);
-      const data = await resp.json();
-      if (data.success) {
-        serverResults = data;
-        showResults(data);
-        return;
-      }
-    } catch (e) { /* retry */ }
+    if (result.error) {
+      alert('Ошибка сервера: ' + result.error);
+      setSubmitBtns(false);
+      return;
+    }
+
+    serverResults = result;
+    showResults(result);
+
+  } catch (err) {
+    hideSendingMsg();
+    setSubmitBtns(false);
+    alert('Ошибка отправки: ' + err.message);
   }
-  setSubmitBtns(false);
-  hidePolling();
-  alert('Не удалось получить результат от сервера. Проверьте у преподавателя.');
 }
 
 function setSubmitBtns(disabled) {
@@ -659,19 +642,19 @@ function setSubmitBtns(disabled) {
   document.getElementById('submit-bottom').disabled = disabled;
 }
 
-function showPolling(msg) {
-  let el = document.getElementById('polling-msg');
+function showSendingMsg(msg) {
+  let el = document.getElementById('sending-msg');
   if (!el) {
     el = document.createElement('div');
-    el.id = 'polling-msg';
-    el.className = 'polling-msg';
-    document.getElementById('submit-bottom').after(el);
+    el.id = 'sending-msg';
+    el.style.cssText = 'text-align:center;margin-top:12px;color:#666;font-size:14px;';
+    document.getElementById('submit-bottom').insertAdjacentElement('afterend', el);
   }
   el.textContent = msg;
 }
 
-function hidePolling() {
-  const el = document.getElementById('polling-msg');
+function hideSendingMsg() {
+  const el = document.getElementById('sending-msg');
   if (el) el.remove();
 }
 
